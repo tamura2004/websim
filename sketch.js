@@ -1,9 +1,10 @@
 class Ball {
   constructor(path, color) {
-    this.p = path.shift();
-    this.path = path.map((p) => p.add(p5.Vector.random2D().mult(20)).copy());
-    this.q = this.path.shift();
-    this.wait = 20;
+    this.p = path.shift()[0].copy();
+    const q = path.shift();
+    this.q = q[0];
+    this.wait = q[1];
+    this.path = path;
     this.visible = true;
     this.color = color;
   }
@@ -14,12 +15,13 @@ class Ball {
 
   get v() {
     const l = this.path.length;
-    const speed = [5, 3, 2, 0].includes(l) ? 4 : 8;
+    // const speed = [5, 3, 2, 0].includes(l) ? 4 : 8;
+    const speed = 4;
     return p5.Vector.sub(this.q, this.p).normalize().mult(speed);
   }
 
   move() {
-    if (this.dist < 4) {
+    if (this.dist < 10) {
       this.park();
     } else {
       this.p = this.p.add(this.v);
@@ -30,13 +32,15 @@ class Ball {
     this.wait--;
     if (this.wait === 0) {
       this.nextDestination();
-      this.wait = 20;
+      // this.wait = 20;
     }
   }
 
   nextDestination() {
     if (this.path.length > 0) {
-      this.q = this.path.shift();
+      const q = this.path.shift();
+      this.q = q[0];
+      this.wait = q[1];
     } else {
       this.visible = false;
     }
@@ -44,7 +48,7 @@ class Ball {
 
   draw() {
     fill(this.color);
-    ellipse(this.p.x, this.p.y, 20);
+    ellipse(this.p.x, this.p.y, 15);
     // text(`${this.path}`, this.p.x, this.p.y)
   }
 }
@@ -60,55 +64,55 @@ function draw() {
   const WIDTH = 80;
   const HEIGHT = 60;
 
-  const START = createVector(100, 300);
+  const PC = [1,2,3,4,5].map((i) => createVector(100, i * 100 ));
   const LB = createVector(400, 300);
-  const WEB1 = createVector(700, 100);
-  const WEB2 = createVector(700, 300);
-  const WEB3 = createVector(700, 500);
+  const WEB = [1,2,3].map((i) => createVector(700, i * 200 - 100));
   const DB = createVector(1000, 300);
-
+  const NODES = [...PC, LB, ...WEB, DB];
+  const colors = ['#c93a40', '#0074bf', '#56a764', '#de9610', '#65ace4', '#f2cf01', '#d16b16'];
+  
   // network
-  line(START.x, START.y, LB.x, LB.y);
-  line(LB.x, LB.y, WEB1.x, WEB1.y);
-  line(LB.x, LB.y, WEB2.x, WEB2.y);
-  line(LB.x, LB.y, WEB3.x, WEB3.y);
-  line(DB.x, DB.y, WEB1.x, WEB1.y);
-  line(DB.x, DB.y, WEB2.x, WEB2.y);
-  line(DB.x, DB.y, WEB3.x, WEB3.y);
+  for (let i = 0; i < 5; i++) {
+    fill(0);
+    line(PC[i].x, PC[i].y, LB.x, LB.y);
+    fill(colors[i]);
+    rect(PC[i].x - WIDTH / 2, PC[i].y - HEIGHT / 2, WIDTH, HEIGHT);
+    fill(255);
+    text(`PC#${i+1}`, PC[i].x - WIDTH * 0.4, PC[i].y);
+  }
+  for (let i = 0; i < 3; i++) {
+    fill(0);
+    line(LB.x, LB.y, WEB[i].x, WEB[i].y);
+    line(DB.x, DB.y, WEB[i].x, WEB[i].y);
+    fill(255);
+    rect(WEB[i].x - WIDTH / 2, WEB[i].y - HEIGHT / 2, WIDTH, HEIGHT);
+    fill(0);
+    text(`WEB#${i+1}`, WEB[i].x - WIDTH * 0.4, WEB[i].y);
+  }
 
-  // server
   fill(255);
-  rect(START.x - WIDTH / 2, START.y - HEIGHT / 2, WIDTH, HEIGHT);
-  rect(WEB1.x - WIDTH / 2, WEB1.y - HEIGHT / 2, WIDTH, HEIGHT);
-  rect(WEB2.x - WIDTH / 2, WEB2.y - HEIGHT / 2, WIDTH, HEIGHT);
-  rect(WEB3.x - WIDTH / 2, WEB3.y - HEIGHT / 2, WIDTH, HEIGHT);
   rect(LB.x - WIDTH / 2, LB.y - HEIGHT / 2, WIDTH, HEIGHT);
   rect(DB.x - WIDTH / 2, DB.y - HEIGHT / 2, WIDTH, HEIGHT);
-
-  // label
   fill(0);
   textSize(18);
-  text('端末', START.x - WIDTH * 0.4, START.y);
   text('LB', LB.x - WIDTH * 0.4, LB.y);
-  text('WEB#1', WEB1.x - WIDTH * 0.4, WEB1.y);
-  text('WEB#2', WEB2.x - WIDTH * 0.4, WEB2.y);
-  text('WEB#3', WEB3.x - WIDTH * 0.4, WEB3.y);
   text('DB', DB.x - WIDTH * 0.4, DB.y);
-  fill(50);
 
-  if (random() < 0.03) {
-    const WEB = random([WEB1, WEB2, WEB3]);
+  const pcIndex = random([0,1,2,3,4]);
+  const path = [
+    [ PC[pcIndex], 1 ],
+    [ LB, 1 ],
+    [ random(WEB), 100 ],
+    [ DB, 300 ],
+    [ random(WEB), 100 ],
+    [ LB, 1 ],
+    [ PC[pcIndex], 1 ],
+  ];
+  const rv = p5.Vector.random2D().mult(20);
+  if (random() < 0.1) {
     balls.push(new Ball(
-      [
-        START.copy(),
-        LB,
-        WEB,
-        DB,
-        WEB,
-        LB,
-        START,
-      ],
-      color(random(256),random(256),random(256)),
+      path.map((p) => [p[0].copy().add(rv), p[1]]),
+      color(colors[pcIndex]),
     ));
   }
 
