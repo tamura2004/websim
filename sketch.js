@@ -1,5 +1,68 @@
+const Vector = p5.Vector;
+
+class Edge {
+  constructor(v, node) {
+    this.v = v;
+    this.node = node;
+    this.tasks = [];
+  }
+
+  push(task) {
+    task.v = this.v;
+    task.dest = this.node.pos;
+  }
+
+  next() {
+    for (const task of this.tasks) {
+      if (task.arrive) {
+        this.node.push(this.tasks.shift());
+      }
+    }
+  }
+}
+
+class Node {
+  constructor(pos, cpu, work, dir, edge) {
+    this.pos = pos; // p5.Vector .. position
+    this.cpu = cpu; // CPU power produced by this node
+    this.work = work; // CPU power required for each task
+    this.dir = dir; // 1 for upstream, -1 for downstream
+    this.edge = edge;
+    this.tasks = [];
+  }
+
+  push(task) {
+    task.wait = this.work;
+    task.v = 2;
+    task.dest = new Vector(this.pos.x - 30 * this.tasks.length * this.dir, this.pos.y);
+    this.tasks.push(task);
+  }
+
+  next() {
+    let pool = this.cpu;
+    while (pool > 0 && this.tasks.length > 0) {
+      const task = this.tasks[0];
+      if (task.wait > pool) {
+        task.wait -= pool;
+        pool = 0;
+      } else {
+        pool -= task.wait;
+        task.wait = 0;
+        this.tasks.shift();
+        if (this.edge !== undefined) {
+          this.edge.push(task);
+        }
+      }
+    }
+    for (let i = 0; i < this.tasks.length; i++) {
+      task.dest = new Vector(this.pos.x - 30 * i, this.pos.y);
+    }
+  }
+}
+
 class Ball {
-  constructor(path, color) {
+  constructor(color) {
+    this.dest = dest; // destination position p5.Vector
     this.p = path.shift()[0].copy();
     const q = path.shift();
     this.q = q[0];
@@ -55,6 +118,7 @@ class Ball {
 
 let balls = [];
 
+
 function setup() {
   createCanvas(1280, 1024);
 }
@@ -70,7 +134,7 @@ function draw() {
   const DB = createVector(1000, 300);
   const NODES = [...PC, LB, ...WEB, DB];
   const colors = ['#c93a40', '#0074bf', '#56a764', '#de9610', '#65ace4', '#f2cf01', '#d16b16'];
-  
+
   // network
   for (let i = 0; i < 5; i++) {
     fill(0);
