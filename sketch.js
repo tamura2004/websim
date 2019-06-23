@@ -51,6 +51,10 @@ class Edge {
     this.tasks = new Queue();
     this.nodes = new Nodes();
   }
+
+  reset() {
+    this.tasks = new Queue();
+  }
   
   push(task) {
     if (task.direction !== 'RIGHT' && task.direction !== 'LEFT') {
@@ -115,6 +119,10 @@ class Node {
     this.edges = new Edges();
   }
 
+  reset() {
+    this.tasks = new Queue();
+  }
+
   link(nodes, direction) {
     for (const node of nodes) {
       const edge = new Edge();
@@ -138,7 +146,7 @@ class Node {
 
   push(task) {
     task.power = this.power;
-    task.speed = 2;
+    task.speed = 1;
     task.position = this.position.copy();
     if (task.direction === 'RIGHT') {
       task.destination = this.position.copy();
@@ -243,7 +251,7 @@ class Task {
   }
 
   get arrive() {
-    return this.distance < this.speed / 2;
+    return this.distance < this.speed / 2 + 1;
   }
 
   next() {
@@ -262,18 +270,21 @@ class Task {
   }
 }
 
+let arriveRato;
+let lbPower, webPower, dbPower;
+
 function setup() {
   createCanvas(1280, 1024);
   for (let i = 1; i < 6; i++) {
     const position = new Vector(100, 100 * i);
     PC.push(new Node(`PC#${i}`, colors[i - 1], position, 10, 0));
   }
-  LB = new Node('LB', 'white', new Vector(400, 300), 10, 100);
+  LB = new Node('LB', 'white', new Vector(400, 300), 3, 30);
   for (let i = 1; i < 4; i++) {
     const position = new Vector(700, i * 200 - 100);
-    WEB.push(new Node(`WEB#${i}`, 'white', position, 10, 300));
+    WEB.push(new Node(`WEB#${i}`, 'white', position, 1, 30));
   }
-  DB = new Node('DB', 'white', new Vector(1000, 300), 10, 200)
+  DB = new Node('DB', 'white', new Vector(1000, 300), 3, 30)
 
   for (const pc of PC) {
     pc.link([LB], 'RIGHT');
@@ -286,13 +297,47 @@ function setup() {
   }
   DB.link(WEB, 'LEFT');
   NODES = [...PC, LB, ...WEB, DB];
+
+  const button = createButton('Reset');
+  button.position(10, 10);
+  button.mousePressed(() => {
+    for (const node of NODES) {
+      for (const edge of node.edges.both) {
+        edge.reset();
+      }
+      node.reset();
+    }
+  });
+
+  arriveRato = createSlider(0, 10, 1);
+  arriveRato.position(200, 10);
+
+  lbPower = createSlider(0, 10, 3);
+  lbPower.position(200, 40);
+
+  webPower = createSlider(0, 10, 1);
+  webPower.position(200, 70);
+
+  dbPower = createSlider(0, 10, 3);
+  dbPower.position(200, 100)
 }
 
 function draw() {
   background(255);
 
-  if (random() < 0.06) {
+  const ratio = arriveRato.value() / 30;
+  text(`リクエスト数：${Math.floor(ratio * 30)}tps`, arriveRato.x + arriveRato.width, 15);
+  if (random() < ratio) {
     random(PC).createTask();
+  }
+
+  text(`LB性能:${lbPower.value()}tps`, lbPower.x + lbPower.width, 45);
+  text(`WEB/AP性能:${webPower.value()}tps`, webPower.x + webPower.width, 75);
+  text(`DB性能:${dbPower.value()}tps`, dbPower.x + dbPower.width, 105);
+  LB.cpu = lbPower.value();
+  DB.cpu = dbPower.value();
+  for (const web of WEB) {
+    web.cpu = webPower.value();
   }
 
   for (const node of NODES) {
