@@ -8,6 +8,9 @@ let LB = null;
 let DB = null;
 const colors = ['#c93a40', '#0074bf', '#56a764', '#de9610', '#65ace4', '#f2cf01', '#d16b16'];
 
+const WAN_SPEED = 2;
+const LAN_SPEED = 4;
+
 class Queue {
   constructor() {
     this.right = [];
@@ -46,7 +49,7 @@ class Edges {
 }
 
 class Edge {
-  constructor(speed = 6) {
+  constructor(speed = LAN_SPEED) {
     this.speed = speed;
     this.tasks = new Queue();
     this.nodes = new Nodes();
@@ -117,6 +120,7 @@ class Node {
     this.power = power; // CPU power consumed by a task to exit
     this.tasks = new Queue();
     this.edges = new Edges();
+    this.webId = 0;
   }
 
   reset() {
@@ -128,14 +132,14 @@ class Node {
       const edge = new Edge();
       if (direction === 'RIGHT') {
         if (node.name === 'LB') {
-          edge.speed = 4;
+          edge.speed = WAN_SPEED;
         }
         edge.nodes.left = this;
         edge.nodes.right = node;
         this.edges.right.push(edge);
       } else if (direction === 'LEFT') {
         if (this.name === 'LB') {
-          edge.speed = 4;
+          edge.speed = WAN_SPEED;
         }
         edge.nodes.right = this;
         edge.nodes.left = node;
@@ -168,17 +172,23 @@ class Node {
           work -= task.power;
           task.power = 0;
           if (this.edges.shape === 'BOTH' || this.edges.shape === 'RIGHT') {
-            random(this.edges.right).push(task);
+            if (this.name === 'LB') {
+              this.edges.right[this.webId].push(task);
+              task.webId = this.webId;
+              this.webId = (this.webId + 1) % 3;
+            } else {
+              random(this.edges.right).push(task);
+            }
           } else if (this.edges.shape === 'LEFT' ) {
             task.direction = 'LEFT';
-            random(this.edges.left).push(task);
+            this.edges.left[task.webId].push(task);
             // this.edges.left[0].push(task);
           } else {
             throw new Error(`Node ${this.name} has no edge`);
           }
         } else {
-          this.tasks.right[0].power -= work;
-          work = 0;
+          this.tasks.right[0].power -= work / 2;
+          work /= 2;
         }
       }
       if (this.tasks.left.length > 0) {
@@ -241,6 +251,7 @@ class Task {
     this.speed = null;
     this.power = null; // Consumed CPU power to exit from node
     this.size = 15;
+    this.webId = null;
   }
 
   get distance() {
@@ -309,16 +320,16 @@ function setup() {
     }
   });
 
-  arriveRato = createSlider(0, 10, 1);
+  arriveRato = createSlider(0, 10, 2);
   arriveRato.position(200, 10);
 
-  lbPower = createSlider(0, 10, 3);
+  lbPower = createSlider(0, 10, 4);
   lbPower.position(200, 40);
 
   webPower = createSlider(0, 10, 1);
   webPower.position(200, 70);
 
-  dbPower = createSlider(0, 10, 3);
+  dbPower = createSlider(0, 10, 2);
   dbPower.position(200, 100)
 }
 
