@@ -63,44 +63,45 @@ class Edge {
     if (task.direction !== 'RIGHT' && task.direction !== 'LEFT') {
       throw new Error(`Task direction must be right or left, but it is actually ${task.direction}`);
     }
-
     if (this.shape === 'NONE') {
       throw new Error('Cannot add a task to edge that have no node');
-
     } else if (this.nodes.shape === 'LEFT' || (this.nodes.shape === 'BOTH' && task.direction === 'LEFT')) {
-      task.destination = this.nodes.left.position;
-      task.speed = this.speed;
-      this.tasks.left.push(task);
-
+      this._push(task, 'LEFT');
     } else {
-      task.destination = this.nodes.right.position;
-      task.speed = this.speed;
-      this.tasks.right.push(task);
+      this._push(task, 'RIGHT');
     }
   }
 
-  next() {
-    const nextRightQueue = [];
-    for (const task of this.tasks.right) {
-      task.next();
-      if (task.arrive) {
-        this.nodes.right.push(task);
-      } else {
-        nextRightQueue.push(task);
-      }
+  _push(task, direction) {
+    direction = direction.toLowerCase();
+    if (direction !== 'right' && direction !== 'left') {
+      throw new Error(`Edge _push called with bad direction: ${direction}`);
     }
-    this.tasks.right = nextRightQueue;
+    task.speed = this.speed;
+    task.destination = this.nodes[direction].position;
+    this.tasks[direction].push(task);
+  }
 
-    const nextLeftQueue = [];
-    for (const task of this.tasks.left) {
+  next() {
+    this._next('RIGHT');
+    this._next('LEFT');
+  }
+
+  _next(direction) {
+    direction = direction.toLowerCase();
+    if (direction !== 'right' && direction !== 'left') {
+      throw new Error(`Edge _next called with bad direction: ${direction}`);
+    }
+    const nextQueue = [];
+    for (const task of this.tasks[direction]) {
       task.next();
       if (task.arrive) {
-        this.nodes.left.push(task);
+        this.nodes[direction].push(task);
       } else {
-        nextLeftQueue.push(task);
+        nextQueue.push(task);
       }
     }
-    this.tasks.left = nextLeftQueue;
+    this.tasks[direction] = nextQueue;
   }
 
   draw() {
