@@ -58,7 +58,7 @@ class Edge {
   reset() {
     this.tasks = new Queue();
   }
-  
+
   push(task) {
     if (task.direction !== 'RIGHT' && task.direction !== 'LEFT') {
       throw new Error(`Task direction must be right or left, but it is actually ${task.direction}`);
@@ -71,7 +71,7 @@ class Edge {
       task.destination = this.nodes.left.position;
       task.speed = this.speed;
       this.tasks.left.push(task);
-      
+
     } else {
       task.destination = this.nodes.right.position;
       task.speed = this.speed;
@@ -238,7 +238,9 @@ class Node {
   }
 
   createTask() {
-    this.push(new Task(this.color));
+    const task = new Task(this.color);
+    this.push(task);
+    return task;
   }
 }
 
@@ -281,11 +283,29 @@ class Task {
   }
 }
 
+class Slider {
+  constructor(min, max, current, x, y, label) {
+    this.label = label;
+    this.slider = createSlider(min, max, current);
+    this.slider.position(x, y);
+  }
+
+  draw() {
+    const label = typeof this.label === 'function' ? this.label(this.value) : this.label;
+    text(label, this.slider.x + this.slider.width, this.slider.y + 5);
+  }
+
+  get value() {
+    return this.slider.value();
+  }
+}
+
 let arriveRato;
 let lbPower, webPower, dbPower;
 
 function setup() {
   createCanvas(1280, 1024);
+
   for (let i = 1; i < 6; i++) {
     const position = new Vector(100, 100 * i);
     PC.push(new Node(`PC#${i}`, colors[i - 1], position, 10, 0));
@@ -320,35 +340,33 @@ function setup() {
     }
   });
 
-  arriveRato = createSlider(0, 10, 2);
-  arriveRato.position(200, 10);
+  const addButton = createButton('Add Request');
+  addButton.position(10, 40);
+  addButton.mousePressed(() => {
+    random(PC).createTask();
+  });
 
-  lbPower = createSlider(0, 10, 4);
-  lbPower.position(200, 40);
-
-  webPower = createSlider(0, 10, 1);
-  webPower.position(200, 70);
-
-  dbPower = createSlider(0, 10, 2);
-  dbPower.position(200, 100)
+  arriveRato = new Slider(0, 10, 3, 200, 10, (value) => `リクエスト数：${value}tps`);
+  lbPower = new Slider(0, 10, 3, 200, 40, (value) => `LB性能:${value}tps`);
+  webPower = new Slider(0, 10, 1, 200, 70, (value) => `WEB/AP性能:${value}tps`);
+  dbPower = new Slider(0, 10, 3, 200, 100, (value) => `DB性能:${value}tps`);
 }
 
 function draw() {
   background(255);
 
-  const ratio = arriveRato.value() / 30;
-  text(`リクエスト数：${Math.floor(ratio * 30)}tps`, arriveRato.x + arriveRato.width, 15);
-  if (random() < ratio) {
+  arriveRato.draw();
+  lbPower.draw();
+  webPower.draw();
+  dbPower.draw();
+
+  if (random() < arriveRato.value / 150) {
     random(PC).createTask();
   }
-
-  text(`LB性能:${lbPower.value()}tps`, lbPower.x + lbPower.width, 45);
-  text(`WEB/AP性能:${webPower.value()}tps`, webPower.x + webPower.width, 75);
-  text(`DB性能:${dbPower.value()}tps`, dbPower.x + dbPower.width, 105);
-  LB.cpu = lbPower.value();
-  DB.cpu = dbPower.value();
+  LB.cpu = lbPower.value * 0.4;
+  DB.cpu = dbPower.value * 0.2;
   for (const web of WEB) {
-    web.cpu = webPower.value();
+    web.cpu = webPower.value * 0.4;
   }
 
   for (const node of NODES) {
