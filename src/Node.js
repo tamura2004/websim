@@ -35,7 +35,7 @@ export default class Node {
     direction = direction.toLowerCase();
     const other = direction === 'right' ? 'left' : 'right';
     const edge = new Edge(this.p5);
-    if (node.name === 'LB') {
+    if ((node.name === 'LB' && direction === 'right') || (this.name === 'LB' && direction === 'left')) {
       edge.speed = WAN_SPEED;
     }
     edge.nodes[other] = this;
