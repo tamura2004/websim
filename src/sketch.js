@@ -1,3 +1,7 @@
+import Queue from '@/Queue.js';
+import Nodes from '@/Nodes.js';
+import Edges from '@/Edges.js';
+
 new p5((p) => {
   const WIDTH = 80;
   const HEIGHT = 60;
@@ -10,43 +14,6 @@ new p5((p) => {
 
   const WAN_SPEED = 2;
   const LAN_SPEED = 4;
-
-  class Queue {
-    constructor() {
-      this.right = [];
-      this.left = [];
-    }
-
-    get both() {
-      return this.right.concat(this.left);
-    }
-  }
-
-  class Nodes {
-    constructor() {
-      this.right = null;
-      this.left = null;
-    }
-
-    get shape() {
-      return this.right ? (this.left ? 'BOTH' : 'RIGHT') : (this.left ? 'LEFT' : 'NONE');
-    }
-  }
-
-  class Edges {
-    constructor() {
-      this.right = [];
-      this.left = [];
-    }
-
-    get shape() {
-      return this.right.length > 0 ? (this.left.length > 0 ? 'BOTH' : 'RIGHT') : (this.left.length > 0 ? 'LEFT' : 'NONE');
-    }
-
-    get both() {
-      return this.right.concat(this.left);
-    }
-  }
 
   class Edge {
     constructor(speed = LAN_SPEED) {
@@ -130,38 +97,60 @@ new p5((p) => {
 
     link(nodes, direction) {
       for (const node of nodes) {
-        const edge = new Edge();
-        if (direction === 'RIGHT') {
-          if (node.name === 'LB') {
-            edge.speed = WAN_SPEED;
-          }
-          edge.nodes.left = this;
-          edge.nodes.right = node;
-          this.edges.right.push(edge);
-        } else if (direction === 'LEFT') {
-          if (this.name === 'LB') {
-            edge.speed = WAN_SPEED;
-          }
-          edge.nodes.right = this;
-          edge.nodes.left = node;
-          this.edges.left.push(edge);
-        }
+        this._link(node, direction);
+        // const edge = new Edge();
+        // if (direction === 'RIGHT') {
+        //   if (node.name === 'LB') {
+        //     edge.speed = WAN_SPEED;
+        //   }
+        //   edge.nodes.left = this;
+        //   edge.nodes.right = node;
+        //   this.edges.right.push(edge);
+        // } else if (direction === 'LEFT') {
+        //   if (this.name === 'LB') {
+        //     edge.speed = WAN_SPEED;
+        //   }
+        //   edge.nodes.right = this;
+        //   edge.nodes.left = node;
+        //   this.edges.left.push(edge);
+        // }
       }
+    }
+
+    _link(node, direction) {
+      direction = direction.toLowerCase();
+      const other = direction === 'right' ? 'left' : 'right';
+      const edge = new Edge();
+      if (node.name === 'LB') {
+        edge.speed = WAN_SPEED;
+      }
+      edge.nodes[other] = this;
+      edge.nodes[direction] = node;
+      this.edges[direction].push(edge);
     }
 
     push(task) {
       task.power = this.power;
       task.speed = 1;
       task.position = this.position.copy();
-      if (task.direction === 'RIGHT') {
-        task.destination = this.position.copy();
-        this.tasks.right.push(task);
-      } else if (task.direction === 'LEFT') {
-        task.destination = this.position.copy();
-        this.tasks.left.push(task);
-      } else {
-        throw new Error(`Bad task direction: ${task.direction}`);
+      task.destination = this.position.copy();
+      this._push(task, task.direction);
+      // if (task.direction === 'RIGHT') {
+      //   this.tasks.right.push(task);
+      // } else if (task.direction === 'LEFT') {
+      //   task.destination = this.position.copy();
+      //   this.tasks.left.push(task);
+      // } else {
+      //   throw new Error(`Bad task direction: ${task.direction}`);
+      // }
+    }
+    
+    _push(task, direction) {
+      direction = direction.toLowerCase();
+      if (direction !== 'right' && direction !== 'left') {
+        throw new Error(`Bad task direction: ${direction}`);
       }
+      this.tasks[direction].push(task);
     }
 
     next() {

@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
   // 公開時には[production]
   // 制作段階では[development]
@@ -9,6 +11,11 @@ module.exports = {
   entry: {
     //各ページ毎に記述を追記していく
     'sketch.js': './src/sketch.js',
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
   },
   module: {
     rules: [
