@@ -28,7 +28,9 @@ export default class Task {
     }
     const dest = this.destination.copy();
     const v = dest.sub(this.position).normalize().mult(this.speed);
-    this.position.add(v);
+    if (!this.arrive) {
+      this.position.add(v);
+    }
   }
 
   draw() {

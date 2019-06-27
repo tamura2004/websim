@@ -22,8 +22,13 @@ export default class Widget {
     this.dbSlider.draw();
   }
 
-  // Update nodes cpu power
-  update() {
+  next() {
+    // Add new task
+    if (this.p5.random() < this.requestSlider.value / 150) {
+      this.p5.random(this.network.pc).createTask();
+    }
+
+    // Update nodes cpu power
     this.network.lb.cpu = this.lbSlider.value * 0.4;
     this.network.db.cpu = this.dbSlider.value * 0.2;
     for (const web of this.network.web) {
