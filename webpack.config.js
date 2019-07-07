@@ -17,6 +17,11 @@ module.exports = {
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  devServer: {
+    contentBase: 'dist',
+    inline: true,
+    hot: true
+  },
   module: {
     rules: [
       {
