@@ -4,6 +4,8 @@ import Edges from '@/Edges.js';
 import Task from '@/Task.js';
 import Colors from '@/Colors';
 
+import Direction from '@/Direction';
+
 const WIDTH = 80;
 const HEIGHT = 60;
 const WAN_SPEED = 2;
@@ -32,15 +34,13 @@ export default class Node {
   }
 
   _link(node, direction) {
-    direction = direction.toLowerCase();
-    const other = direction === 'right' ? 'left' : 'right';
     const edge = new Edge(this.p5);
-    if ((node.name === 'LB' && direction === 'right') || (this.name === 'LB' && direction === 'left')) {
+    if ((node.name === 'LB' && direction.isRight) || (this.name === 'LB' && direction.isLeft)) {
       edge.speed = WAN_SPEED;
     }
-    edge.nodes[other] = this;
-    edge.nodes[direction] = node;
-    this.edges[direction].push(edge);
+    edge.nodes[direction.other] = this;
+    edge.nodes[direction.key] = node;
+    this.edges[direction.key].push(edge);
   }
 
   push(task) {
@@ -52,11 +52,7 @@ export default class Node {
   }
 
   _push(task, direction) {
-    direction = direction.toLowerCase();
-    if (direction !== 'right' && direction !== 'left') {
-      throw new Error(`Bad task direction: ${direction}`);
-    }
-    this.tasks[direction].push(task);
+    this.tasks[direction.key].push(task);
   }
 
   next() {
@@ -76,9 +72,8 @@ export default class Node {
               this.p5.random(this.edges.right).push(task);
             }
           } else if (this.edges.shape === 'LEFT') {
-            task.direction = 'LEFT';
+            task.direction.setLeft();
             this.edges.left[task.webId].push(task);
-            // this.edges.left[0].push(task);
           } else {
             throw new Error(`Node ${this.name} has no edge`);
           }
@@ -134,7 +129,7 @@ export default class Node {
   }
 
   createTask() {
-    const task = new Task(this.p5, this.color);
+    const task = new Task(this.p5, this.color, Direction.Right);
     this.push(task);
     return task;
   }

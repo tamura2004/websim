@@ -1,10 +1,9 @@
 import Nodes from '@/Nodes.js';
 import Queue from '@/Queue.js';
-
-const LAN_SPEED = 4;
+import Direction from '@/Direction.js';
 
 export default class Edge {
-  constructor(p5, speed = LAN_SPEED) {
+  constructor(p5, speed = 4) {
     this.speed = speed;
     this.p5 = p5;
     this.tasks = new Queue();
@@ -16,42 +15,35 @@ export default class Edge {
   }
 
   taskDirection(task) {
-    if (task.direction !== 'RIGHT' && task.direction !== 'LEFT') {
-      throw new Error(`Task direction must be right or left, but it is actually ${task.direction}`);
-    }
     if (this.shape === 'NONE') {
       throw new Error('Cannot add a task to edge that have no node');
     }
-    return this.nodes.shape === 'LEFT' || (this.nodes.shape === 'BOTH' && task.direction === 'LEFT') ? 'LEFT' : 'RIGHT';
+    return this.nodes.taskDirection(task);
   }
 
   push(task) {
-    const direction = this.taskDirection(task).toLowerCase();
+    const direction = this.taskDirection(task);
     task.speed = this.speed;
-    task.destination = this.nodes[direction].position;
-    this.tasks[direction].push(task);
+    task.destination = this.nodes[direction.key].position;
+    this.tasks[direction.key].push(task);
   }
 
   next() {
-    this._next('RIGHT');
-    this._next('LEFT');
+    this._next(Direction.Right);
+    this._next(Direction.Left);
   }
 
   _next(direction) {
-    direction = direction.toLowerCase();
-    if (direction !== 'right' && direction !== 'left') {
-      throw new Error(`Edge _next called with bad direction: ${direction}`);
-    }
     const nextQueue = [];
-    for (const task of this.tasks[direction]) {
+    for (const task of this.tasks[direction.key]) {
       task.next();
       if (task.arrive) {
-        this.nodes[direction].push(task);
+        this.nodes[direction.key].push(task);
       } else {
         nextQueue.push(task);
       }
     }
-    this.tasks[direction] = nextQueue;
+    this.tasks[direction.key] = nextQueue;
   }
 
   draw() {

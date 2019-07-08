@@ -10,7 +10,7 @@ module.exports = {
   },
   entry: {
     //各ページ毎に記述を追記していく
-    'sketch.js': './src/sketch.js',
+    'index.js': './src/index.js',
   },
   resolve: {
     alias: {
