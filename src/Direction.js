@@ -1,40 +1,27 @@
-export default class Direction {
+const R = 'right';
+const L = 'left';
+
+class Direction {
   constructor(value) {
-    if (value !== 'RIGHT' && value !== 'LEFT') {
-      throw new Error(`Direction must be right or left, but it is initialized by ${value}`);
-    }
     this.value = value;
   }
 
-  static get Right() {
-    return new Direction('RIGHT');
-  }
-
-  static get Left() {
-    return new Direction('LEFT');
-  }
-
   get isRight() {
-    return this.value === 'RIGHT';
+    return this.value === R;
   }
 
   get isLeft() {
-    return this.value === 'LEFT';
+    return this.value === L;
   }
 
   get key() {
-    return this.isRight ? 'right': 'left';
+    return this.isRight ? R : L;
   }
 
   get other() {
-    return this.isRight ? 'left': 'right';
-  }
-
-  setRight() {
-    this.value = 'RIGHT';
-  }
-
-  setLeft() {
-    this.value = 'LEFT';
+    return this.isRight ? L : R;
   }
 }
+
+export const Right = new Direction(R);
+export const Left = new Direction(L);

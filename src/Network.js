@@ -2,7 +2,7 @@ import Pc from '@/Pc.js';
 import Web from '@/Web.js';
 import Lb from '@/Lb.js';
 import Db from '@/Db.js';
-import Direction from '@/Direction.js';
+import { Right, Left } from '@/Direction.js';
 
 export default class Network {
   constructor(p5) {
@@ -18,15 +18,15 @@ export default class Network {
 
   linkNodes() {
     for (const pc of this.pc) {
-      pc.link([this.lb], Direction.Right);
+      pc.link([this.lb], Right);
     }
-    this.lb.link(this.web, Direction.Right);
-    this.lb.link(this.pc, Direction.Left);
+    this.lb.link(this.web, Right);
+    this.lb.link(this.pc, Left);
     for (const web of this.web) {
-      web.link([this.db], Direction.Right);
-      web.link([this.lb], Direction.Left);
+      web.link([this.db], Right);
+      web.link([this.lb], Left);
     }
-    this.db.link(this.web, Direction.Left);
+    this.db.link(this.web, Left);
   }
 
   reset() {

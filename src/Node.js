@@ -4,7 +4,7 @@ import Edges from '@/Edges.js';
 import Task from '@/Task.js';
 import Colors from '@/Colors';
 
-import Direction from '@/Direction';
+import { Right, Left } from '@/Direction.js';
 
 const WIDTH = 80;
 const HEIGHT = 60;
@@ -72,7 +72,7 @@ export default class Node {
               this.p5.random(this.edges.right).push(task);
             }
           } else if (this.edges.shape === 'LEFT') {
-            task.direction.setLeft();
+            task.direction = Left;
             this.edges.left[task.webId].push(task);
           } else {
             throw new Error(`Node ${this.name} has no edge`);
@@ -129,7 +129,7 @@ export default class Node {
   }
 
   createTask() {
-    const task = new Task(this.p5, this.color, Direction.Right);
+    const task = new Task(this.p5, this.color, Right);
     this.push(task);
     return task;
   }

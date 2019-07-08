@@ -1,6 +1,6 @@
 import Nodes from '@/Nodes.js';
 import Queue from '@/Queue.js';
-import Direction from '@/Direction.js';
+import { Right, Left } from '@/Direction.js';
 
 export default class Edge {
   constructor(p5, speed = 4) {
@@ -29,8 +29,8 @@ export default class Edge {
   }
 
   next() {
-    this._next(Direction.Right);
-    this._next(Direction.Left);
+    this._next(Right);
+    this._next(Left);
   }
 
   _next(direction) {

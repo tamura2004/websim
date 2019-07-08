@@ -1,4 +1,4 @@
-import Direction from '@/Direction.js';
+import { Right, Left } from '@/Direction.js';
 
 export default class Nodes {
   constructor() {
@@ -19,6 +19,6 @@ export default class Nodes {
   }
 
   taskDirection(task) {
-    return this.isLeft || (this.isBoth && task.direction.isLeft) ? Direction.Left : Direction.Right;
+    return this.isLeft || (this.isBoth && task.direction.isLeft) ? Left : Right;
   }
 }

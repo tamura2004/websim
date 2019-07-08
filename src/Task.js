@@ -1,10 +1,8 @@
-import Direction from '@/Direction.js';
-
 export default class Task {
   constructor(p5, color, direction) {
     this.p5 = p5;
     this.color = color;
-    this.direction = new Direction(direction.value);
+    this.direction = direction;
     this.position = null;
     this.destination = null;
     this.speed = null;
