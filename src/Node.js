@@ -57,8 +57,8 @@ export default class Node {
 
   next() {
     let work = this.cpu;
-    while (work > 0 && (this.tasks.right.length > 0 || this.tasks.left.length > 0)) {
-      if (this.tasks.right.length > 0) {
+    while (work > 0 && this.tasks.isNotEmpty()) {
+      if (this.tasks.isNotEmpty(Right)) {
         if (this.tasks.right[0].power <= work) {
           const task = this.tasks.right.shift();
           work -= task.power;
@@ -82,7 +82,7 @@ export default class Node {
           work /= 2;
         }
       }
-      if (this.tasks.left.length > 0) {
+      if (this.tasks.isNotEmpty(Left)) {
         if (this.tasks.left[0].power <= work) {
           const task = this.tasks.left.shift();
           work -= task.power;

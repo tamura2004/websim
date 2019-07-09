@@ -1,3 +1,5 @@
+export const FPS = 150;
+
 export const SPEED = {
   LAN: 4,
   WAN: 1,

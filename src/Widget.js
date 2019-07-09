@@ -10,9 +10,9 @@ export default class Widget {
     new Button(p5, 'Add Req', 10, 40, () => network.createTask());
 
     this.requestSlider = new Slider(p5, 0, 10, 3, 200, 10, (value) => `リクエスト数：${value}tps`);
-    this.lbSlider = new Slider(p5, 0, 10, 3, 200, 40, (value) => `LB性能:${value}tps`);
-    this.webSlider = new Slider(p5, 0, 10, 1, 200, 70, (value) => `WEB/AP性能:${value}tps`);
-    this.dbSlider = new Slider(p5, 0, 10, 3, 200, 100, (value) => `DB性能:${value}tps`);
+    this.lbSlider      = new Slider(p5, 0, 10, 3, 200, 40, (value) => `LB性能:${value}tps`);
+    this.webSlider     = new Slider(p5, 0, 10, 1, 200, 70, (value) => `WEB/AP性能:${value}tps`);
+    this.dbSlider      = new Slider(p5, 0, 10, 3, 200, 100, (value) => `DB性能:${value}tps`);
   }
 
   draw() {
