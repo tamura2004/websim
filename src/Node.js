@@ -4,7 +4,7 @@ import Edges from '@/Edges.js';
 import Task from '@/Task.js';
 import Colors from '@/Colors';
 
-import { Right, Left } from '@/Direction.js';
+import { Right, Left, None, Both } from '@/Direction.js';
 
 const WIDTH = 80;
 const HEIGHT = 60;
@@ -63,7 +63,7 @@ export default class Node {
           const task = this.tasks.right.shift();
           work -= task.power;
           task.power = 0;
-          if (this.edges.shape === 'BOTH' || this.edges.shape === 'RIGHT') {
+          if (this.edges.shape === Both || this.edges.shape === Right) {
             if (this.name === 'LB') {
               this.edges.right[this.webId].push(task);
               task.webId = this.webId;
@@ -71,7 +71,7 @@ export default class Node {
             } else {
               this.p5.random(this.edges.right).push(task);
             }
-          } else if (this.edges.shape === 'LEFT') {
+          } else if (this.edges.shape === Left) {
             task.direction = Left;
             this.edges.left[task.webId].push(task);
           } else {
@@ -87,11 +87,11 @@ export default class Node {
           const task = this.tasks.left.shift();
           work -= task.power;
           task.power = 0;
-          if (this.edges.shape === 'BOTH' || this.edges.shape === 'LEFT') {
+          if (this.edges.shape === Both || this.edges.shape === Left) {
             const i = Colors.indexOf(task.color);
             const edge = (i !== -1 && this.name === 'LB') ? this.edges.left[i] : this.p5.random(this.edges.left);
             edge.push(task);
-          } else if (this.edges.shape === 'RIGHT') {
+          } else if (this.edges.shape === Right) {
             // I'm home.
           } else {
             throw new Error('Node has no edge');

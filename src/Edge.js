@@ -1,6 +1,6 @@
 import Nodes from '@/Nodes.js';
 import Queue from '@/Queue.js';
-import { Right, Left } from '@/Direction.js';
+import { Right, Left, None, Both } from '@/Direction.js';
 
 export default class Edge {
   constructor(p5, speed = 4) {
@@ -15,7 +15,7 @@ export default class Edge {
   }
 
   taskDirection(task) {
-    if (this.shape === 'NONE') {
+    if (this.shape === None) {
       throw new Error('Cannot add a task to edge that have no node');
     }
     return this.nodes.taskDirection(task);
@@ -47,7 +47,7 @@ export default class Edge {
   }
 
   draw() {
-    if (this.nodes.shape === 'BOTH') {
+    if (this.nodes.shape === Both) {
       this.p5.fill(0);
       this.p5.line(this.nodes.left.position.x, this.nodes.left.position.y, this.nodes.right.position.x, this.nodes.right.position.y);
     }

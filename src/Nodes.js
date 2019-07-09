@@ -1,4 +1,4 @@
-import { Right, Left } from '@/Direction.js';
+import { Right, Left, None, Both } from '@/Direction.js';
 
 export default class Nodes {
   constructor() {
@@ -7,15 +7,15 @@ export default class Nodes {
   }
 
   get shape() {
-    return this.right ? (this.left ? 'BOTH' : 'RIGHT') : (this.left ? 'LEFT' : 'NONE');
+    return this.right ? (this.left ? Both : Right) : (this.left ? Left : None);
   }
 
   get isLeft() {
-    return this.shape === 'LEFT';
+    return this.shape === Left;
   }
 
   get isBoth() {
-    return this.shape === 'BOTH';
+    return this.shape === Both;
   }
 
   taskDirection(task) {

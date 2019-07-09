@@ -1,3 +1,5 @@
+import { Right, Left, None, Both } from '@/Direction';
+
 export default class Edges {
     constructor() {
         this.right = [];
@@ -5,7 +7,7 @@ export default class Edges {
     }
 
     get shape() {
-        return this.right.length > 0 ? (this.left.length > 0 ? 'BOTH' : 'RIGHT') : (this.left.length > 0 ? 'LEFT' : 'NONE');
+        return this.right.length > 0 ? (this.left.length > 0 ? Both : Right) : (this.left.length > 0 ? Left : None);
     }
 
     get both() {
