@@ -1,16 +1,15 @@
-import { Right, Left, None, Both } from '@/Direction';
-
 export default class Edges {
-    constructor() {
-        this.right = [];
-        this.left = [];
-    }
+  constructor() {
+    this.right = [];
+    this.left = [];
+  }
 
-    get shape() {
-        return this.right.length > 0 ? (this.left.length > 0 ? Both : Right) : (this.left.length > 0 ? Left : None);
+  * both() {
+    for (const edge of this.right) {
+      yield edge;
     }
-
-    get both() {
-        return this.right.concat(this.left);
+    for (const edge of this.left) {
+      yield edge;
     }
+  }
 }

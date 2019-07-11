@@ -8,6 +8,4 @@ export const SPEED = {
 export const DB = {
   X_POS: 1000,
   Y_POS: 300,
-  CPU: 3,
-  POWER: 30,
 }

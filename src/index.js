@@ -1,5 +1,5 @@
-import Network from '@/Network.js';
-import Widget from '@/Widget.js';
+import Network from '@/Network';
+import Widget from '@/Widget';
 
 new p5((p) => {
   let network, widget;

@@ -1,6 +1,6 @@
-import Nodes from '@/Nodes.js';
-import Queue from '@/Queue.js';
-import { Right, Left, None, Both } from '@/Direction.js';
+import Nodes from '@/Nodes';
+import Queue from '@/Queue';
+import { Right, Left } from '@/Direction';
 
 export default class Edge {
   constructor(p5, speed = 4) {
@@ -14,18 +14,11 @@ export default class Edge {
     this.tasks = new Queue();
   }
 
-  taskDirection(task) {
-    if (this.shape === None) {
-      throw new Error('Cannot add a task to edge that have no node');
-    }
-    return this.nodes.taskDirection(task);
-  }
-
   push(task) {
-    const direction = this.taskDirection(task);
+    const key = task.direction.key
     task.speed = this.speed;
-    task.destination = this.nodes[direction.key].position;
-    this.tasks[direction.key].push(task);
+    task.destination = this.nodes[key].position;
+    this.tasks[key].push(task);
   }
 
   next() {
@@ -34,22 +27,18 @@ export default class Edge {
   }
 
   _next(direction) {
-    const nextQueue = [];
-    for (const task of this.tasks[direction.key]) {
+    const tasks = this.tasks[direction.key];
+    for (const task of tasks) {
       task.next();
-      if (task.arrive) {
-        this.nodes[direction.key].push(task);
-      } else {
-        nextQueue.push(task);
-      }
     }
-    this.tasks[direction.key] = nextQueue;
+    while (tasks.length > 0 && tasks[0].arrive) {
+      const task = tasks.shift();
+      this.nodes[direction.key].push(task);
+    }
   }
 
   draw() {
-    if (this.nodes.shape === Both) {
-      this.p5.fill(0);
-      this.p5.line(this.nodes.left.position.x, this.nodes.left.position.y, this.nodes.right.position.x, this.nodes.right.position.y);
-    }
+    this.p5.fill(0);
+    this.p5.line(this.nodes.left.position.x, this.nodes.left.position.y, this.nodes.right.position.x, this.nodes.right.position.y);
   }
 }

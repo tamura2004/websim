@@ -1,8 +1,8 @@
-import Pc from '@/Pc.js';
-import Web from '@/Web.js';
-import Lb from '@/Lb.js';
-import Db from '@/Db.js';
-import { Right, Left } from '@/Direction.js';
+import Pc from '@/Pc';
+import Web from '@/Web';
+import Lb from '@/Lb';
+import Db from '@/Db';
+import { Right, Left } from '@/Direction';
 
 export default class Network {
   constructor(p5) {
@@ -40,7 +40,7 @@ export default class Network {
 
   *edges() {
     for (const node of this.nodes) {
-      for (const edge of node.edges.both) {
+      for (const edge of node.edges.both()) {
         yield edge;
       }
     }
@@ -48,12 +48,12 @@ export default class Network {
 
   *tasks() {
     for (const edge of this.edges()) {
-      for (const task of edge.tasks.both) {
+      for (const task of edge.tasks.both()) {
         yield task;
       }
     }
     for (const node of this.nodes) {
-      for (const task of node.tasks.both) {
+      for (const task of node.tasks.both()) {
         yield task;
       }
     }

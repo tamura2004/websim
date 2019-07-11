@@ -1,26 +1,24 @@
-import Queue from '@/Queue.js';
-import Edge from '@/Edge.js';
-import Edges from '@/Edges.js';
-import Task from '@/Task.js';
-import Colors from '@/Colors';
+import Queue from '@/Queue';
+import Edge from '@/Edge';
+import Edges from '@/Edges';
+import Task from '@/Task';
 
-import { Right, Left, None, Both } from '@/Direction.js';
+import { Right, Left } from '@/Direction';
 
 const WIDTH = 80;
 const HEIGHT = 60;
 const WAN_SPEED = 2;
 
 export default class Node {
-  constructor(p5, name, color, position, cpu, power) {
+  constructor(p5, name, color, position) {
     this.p5 = p5;
     this.name = name;
     this.color = color;
     this.position = position;
-    this.cpu = cpu;
-    this.power = power; // CPU power consumed by a task to exit
+    this.cpu = 1; // 1TPS
+    this.power = 150; // CPU power consumed by a task to exit
     this.tasks = new Queue();
     this.edges = new Edges();
-    this.webId = 0;
   }
 
   reset() {
@@ -55,63 +53,43 @@ export default class Node {
     this.tasks[direction.key].push(task);
   }
 
-  next() {
+  dispatch(task) {
+    this.p5.random(this.edges[task.direction.key]).push(task);
+  }
+
+  _next(direction) {
     let work = this.cpu;
-    while (work > 0 && this.tasks.isNotEmpty()) {
-      if (this.tasks.isNotEmpty(Right)) {
-        if (this.tasks.right[0].power <= work) {
-          const task = this.tasks.right.shift();
-          work -= task.power;
-          task.power = 0;
-          if (this.edges.shape === Both || this.edges.shape === Right) {
-            if (this.name === 'LB') {
-              this.edges.right[this.webId].push(task);
-              task.webId = this.webId;
-              this.webId = (this.webId + 1) % 3;
-            } else {
-              this.p5.random(this.edges.right).push(task);
-            }
-          } else if (this.edges.shape === Left) {
-            task.direction = Left;
-            this.edges.left[task.webId].push(task);
-          } else {
-            throw new Error(`Node ${this.name} has no edge`);
-          }
-        } else {
-          this.tasks.right[0].power -= work / 2;
-          work /= 2;
-        }
+    const tasks = this.tasks[direction.key];
+    for (const task of tasks) {
+      if (work === 0) {
+        break;
       }
-      if (this.tasks.isNotEmpty(Left)) {
-        if (this.tasks.left[0].power <= work) {
-          const task = this.tasks.left.shift();
-          work -= task.power;
-          task.power = 0;
-          if (this.edges.shape === Both || this.edges.shape === Left) {
-            const i = Colors.indexOf(task.color);
-            const edge = (i !== -1 && this.name === 'LB') ? this.edges.left[i] : this.p5.random(this.edges.left);
-            edge.push(task);
-          } else if (this.edges.shape === Right) {
-            // I'm home.
-          } else {
-            throw new Error('Node has no edge');
-          }
-        } else {
-          this.tasks.left[0].power -= work;
-          work = 0;
-        }
+      if (task.power <= work) {
+        work -= task.power;
+        task.power = 0;
+      } else {
+        task.power -= work;
+        work = 0;
       }
     }
-    for (let i = 0; i < this.tasks.right.length; i++) {
-      this.tasks.right[i].destination = this.p5.createVector(this.position.x + 20, this.position.y + 20 * i);
+    while (tasks.length > 0 && tasks[0].power === 0) {
+      const task = tasks.shift();
+      this.dispatch(task);
     }
-    for (let i = 0; i < this.tasks.left.length; i++) {
-      this.tasks.left[i].destination = this.p5.createVector(this.position.x - 20, this.position.y - 20 * i);
-    }
-    for (const edge of this.edges.both) {
+    tasks.forEach((task, index) => {
+      const offset = task.direction.offset;
+      task.destination = this.p5.createVector(this.position.x + offset, this.position.y + offset * index);
+    });
+  }
+
+  next() {
+    this._next(Right);
+    this._next(Left);
+
+    for (const edge of this.edges.both()) {
       edge.next();
     }
-    for (const task of this.tasks.both) {
+    for (const task of this.tasks.both()) {
       task.next();
     }
   }
@@ -125,7 +103,7 @@ export default class Node {
       this.p5.fill('white');
     }
     this.p5.text(this.name, this.position.x - WIDTH * 0.4, this.position.y - HEIGHT * 0.2);
-    this.p5.text(`${this.tasks.both.length}`, this.position.x - WIDTH * 0.4, this.position.y);
+    this.p5.text(`${this.tasks.right.length + this.tasks.left.length}`, this.position.x - WIDTH * 0.4, this.position.y);
   }
 
   createTask() {

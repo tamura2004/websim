@@ -1,5 +1,5 @@
-import Slider from '@/Slider.js';
-import Button from '@/Button.js';
+import Slider from '@/Slider';
+import Button from '@/Button';
 
 export default class Widget {
   constructor(p5, network) {
@@ -29,10 +29,10 @@ export default class Widget {
     }
 
     // Update nodes cpu power
-    this.network.lb.cpu = this.lbSlider.value * 0.4;
-    this.network.db.cpu = this.dbSlider.value * 0.2;
+    this.network.lb.cpu = this.lbSlider.value;
+    this.network.db.cpu = this.dbSlider.value;
     for (const web of this.network.web) {
-      web.cpu = this.webSlider.value * 0.4;
+      web.cpu = this.webSlider.value;
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Right, Left } from '@/Direction.js';
+import { Right, Left } from '@/Direction';
 
 export default class Queue {
   constructor() {
@@ -6,8 +6,13 @@ export default class Queue {
     this.left = [];
   }
 
-  get both() {
-    return this.right.concat(this.left);
+  *both() {
+    for (const task of this.right) {
+      yield task;
+    }
+    for (const task of this.left) {
+      yield task;
+    }
   }
 
   isNotEmpty(direction) {
